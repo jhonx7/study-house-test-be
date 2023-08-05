@@ -1,0 +1,46 @@
+version: '3.8'
+networks:
+  lumen:
+services:
+  lumen:
+    environment:
+      DB_DATABASE: studyhouse
+      DB_USERNAME: user
+      DB_PASSWORD: studyhouse
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor/
+    build:
+      args:
+        user: www-data
+        uid: 1000
+      context: .
+      dockerfile: Dockerfile
+    container_name: lumen
+    command: php -S lumen:8000 -t public
+    restart: always
+    depends_on:
+      - mysql
+    networks:
+      - lumen
+  mysql:
+    image: mysql:8.0.26
+    container_name: mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: studyhouse
+      MYSQL_USER: user
+      MYSQL_PASSWORD: studyhouse
+      MYSQL_ROOT_PASSWORD: root
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - lumen
+  
